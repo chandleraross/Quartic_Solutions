@@ -39,9 +39,22 @@ def altas_refresh(in_shp, new_field_1, new_field_2, nf1_value, nf2_value, txt_pa
     # If pandas is not available then arcpy will be used
     try:
         import geopandas as gpd
+        # Read in the shapefile
+        gdf = gpd.read_file(in_shp)
+
+        # Add the new fields and set it equal to another field
+        gdf = gdf.assign(new_field_1=nf1_value)
+        gdf = gdf.assign(new_field_2=nf2_value)
+
+        # Change the type and percision for the new columns
+        convert_dict = {new_field_1: str, new_field_2: str} # make a change dictionary so both are strings
+        gdf = gdf.astype(convert_dict)
+
+        # Write the geodataframe to an output shapefile
+        gdf.to_file(in_shp) # TODO Check to see if it properly overwrites the file with the new data
         
     except:
-        # Use arcpy to add the new fields
+        # Use arcpy to add the new fields if geopandas is unavailable
         arcpy.management.AddField(in_shp, new_field_1, nf1_type, nf1_precision)
         arcpy.management.AddField(in_shp, new_field_2, nf2_type, nf2_precision)
 
@@ -71,4 +84,5 @@ def add_field(in_shp, new_field, nf_value, nf_type, nf_precision):
 def calc_field():
     pass
 
-
+if __name__ == '__main__':
+    pass
