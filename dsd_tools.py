@@ -8,6 +8,7 @@
 #----------------------------------------------------------------------------------------------
 
 import arcpy
+import os
 
 #----------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------
@@ -16,12 +17,11 @@ import arcpy
 #----------------------------------------------------------------------------------------------
 
 
-
 # Atlas Refresh
 def altas_refresh(in_shp, new_field_1, new_field_2, nf1_value, nf2_value, txt_path, nf1_type='TEXT', nf2_type='TEXT',
                   nf1_precision=60, nf2_precision=254, add_txt=False):
     """
-    This function adds two new fields 
+    This function adds two new fields (Work In Progress)
     :param in_shp: Input shapefile to be modified for the refresh
     :param new_field_1: New field to be created; String
     :param new_field_2: New field to be created; String
@@ -43,8 +43,8 @@ def altas_refresh(in_shp, new_field_1, new_field_2, nf1_value, nf2_value, txt_pa
         gdf = gpd.read_file(in_shp)
 
         # Add the new fields and set it equal to another field
-        gdf = gdf.assign(new_field_1=nf1_value)
-        gdf = gdf.assign(new_field_2=nf2_value)
+        gdf = gdf.assign(new_field_1=gdf[nf1_value])
+        gdf = gdf.assign(new_field_2=gdf[nf2_value])
 
         # Change the type and percision for the new columns
         convert_dict = {new_field_1: str, new_field_2: str} # make a change dictionary so both are strings
@@ -64,9 +64,9 @@ def altas_refresh(in_shp, new_field_1, new_field_2, nf1_value, nf2_value, txt_pa
         # Calculate nf1
         arcpy.management.CalculateField(in_shp, new_field_1, expression1, expression_type="PYTHON3")
         # Make the expression for nf2
-        expression1 = "!" + nf2_value + "!"
+        expression2 = "!" + nf2_value + "!"
         # Calculate nf2
-        arcpy.management.CalculateField(in_shp, new_field_2, expression1, expression_type="PYTHON3")
+        arcpy.management.CalculateField(in_shp, new_field_2, expression2, expression_type="PYTHON3")
 
 
 def add_field(in_shp, new_field, nf_value, nf_type, nf_precision):
@@ -84,5 +84,28 @@ def add_field(in_shp, new_field, nf_value, nf_type, nf_precision):
 def calc_field():
     pass
 
+def dsd_data_check(envt, layer):
+    """
+    This function checks for if the DSD data exists anywhere else
+    :parameter envt: The Atlas environment to check; String
+    :parameter layer: The layer to look for; String
+    :return: Prints location of duplicates
+    """
+    arcpy.env.workspace = envt
+    print("Searching for duplicates, may take awhile")
+    for dirpath, dirnames, filenames in arcpy.da.Walk():
+        if layer.lower() in [z.lower() for z in filenames]:
+            if(dirpath == os.path.join(envt, 'SDW.CITY.DSD')):
+                print('Found in DSD, looking for other locations')
+            else:
+                print(dirpath)
+                break
+    print('No duplicates!')
+
+
 if __name__ == '__main__':
-    pass
+
+    # EXAMPLES
+    dsd_data_check(envt=r'\\kdc-nas1\GIS-HOME$\Workspace\rossc\Temp\database_lookup\CITY@ALTAS@SDW.sde',
+                   layer='SDW.CITY.parking_standards_transit_priority_areas')
+
