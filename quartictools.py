@@ -1,6 +1,6 @@
 # Author: Chandler Ross | Quartic Solutions
 
-# This is a module with miscelanous python tools for various quartic solution needs
+# This is a module with miscellaneous python tools for various quartic solution needs
 
 # Imports
 from datetime import datetime, date
