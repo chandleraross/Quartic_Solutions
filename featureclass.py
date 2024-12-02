@@ -30,8 +30,12 @@ class FC:
         param include_type: True gives name and type, False is just name; Bool
         """
         fields = arcpy.ListFields(self.path)
-        if include_type == True:
-            return [f'Name: {field.name}, Type: {field.type}' for field in fields]
+        if include_type:
+            ret_list = []
+            for field in fields:
+                name_list = [field.name, field.type]
+                ret_list.append(name_list)
+            return ret_list
         else:
             return [field.name for field in fields]
 
@@ -65,7 +69,7 @@ class FC:
         else:
             return df
 
-    #===============================================================
+    # ===============================================================
     #  Versioning Methods
     # ===============================================================
 
@@ -88,6 +92,14 @@ class FC:
     def get_current_version(self):
         """Returns the current version."""
         return self.current_version
+
+    def is_versioned(self):
+        """
+        Checks if a feature class is versioned
+        :return: True if versioned and False if not versioned
+        """
+        dataset_versioned = arcpy.Describe(fc_path).isVersioned
+        return dataset_versioned
 
     def list_versions(self):
         """
@@ -236,7 +248,6 @@ class FC:
 
         except Exception as e:
             print(f"Error: {str(e)}")
-
 
     def load_data_versioned(self, csv_file, field_to_update, field_to_read, idfield_update, idfield_read):
         """
